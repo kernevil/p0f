@@ -40,13 +40,16 @@ static u8 state = CF_NEED_SECT,         /* Parser state (CF_NEED_*)           */
 
 static s32 sig_class;                   /* Signature class ID (-1 = userland) */
 static u32 sig_name;                    /* Signature name                     */
+static s32 ipset_id;                    /* ipset ID (-1 = not defined)        */
+static u32 ipset_count;                 /* Current ipset ID		      */
 static u8* sig_flavor;                  /* Signature flavor                   */
 
 static u32* cur_sys;                    /* Current 'sys' values               */
 static u32  cur_sys_cnt;                /* Number of 'sys' entries            */
 
 u8 **fp_os_classes,                     /* Map of OS classes                  */
-   **fp_os_names;                       /* Map of OS names                    */
+   **fp_os_names,                       /* Map of OS names                    */
+   **fp_ipset_names;                    /* Map of ipset names                 */
 
 static u32 class_cnt,                   /* Sizes for maps                     */
            name_cnt,
@@ -105,6 +108,30 @@ u32 lookup_name_id(u8* name, u8 len) {
 
 }
 
+u32 lookup_ipset_id(u8 *name, u8 len) {
+
+  u32 i;
+
+  for (i = 0; i < ipset_count; i++)
+    if (!strncasecmp((char*)name, (char*)fp_ipset_names[i], len)
+        && !fp_ipset_names[i][len]) break;
+
+  if (i == ipset_count) {
+    ipset_id = ipset_count;
+    fp_ipset_names = DFL_ck_realloc(fp_ipset_names, (ipset_count + 1) * sizeof(u8*));
+    fp_ipset_names[ipset_count++] = DFL_ck_memdup_str(name, len);
+  }
+
+  return i;
+}
+
+static void config_parse_ipset(u8* val) {
+  u8* nxt;
+
+  nxt = val;
+  while (isalnum(*nxt)) nxt++;
+  ipset_id = lookup_ipset_id(val, nxt - val);
+}
 
 /* Parse 'label' parameter by looking up ID and recording name / flavor. */
 
@@ -335,8 +362,10 @@ static void config_parse_line(u8* line) {
 
     config_parse_label(val);
 
-    if (mod_type != CF_MOD_MTU && sig_class < 0) state = CF_NEED_SYS;
-    else state = CF_NEED_SIG;
+    if (mod_type == CF_MOD_MTU) state = CF_NEED_SIG;
+    else if (mod_type == CF_MOD_TCP && sig_class == -1) state = CF_NEED_SYS;
+    else if (mod_type == CF_MOD_TCP) state = CF_NEED_IPSET;
+    else state = CF_NEED_SYS;
 
   } else if (!strcmp((char*)line, "sys")) {
 
@@ -345,17 +374,29 @@ static void config_parse_line(u8* line) {
 
     config_parse_sys(val);
 
+    state = CF_NEED_IPSET;
+
+  } else if (!strcmp((char*)line, "ipset")) {
+
+    if (state != CF_NEED_IPSET) FATAL("Misplaced 'ipset' in line %u.", line_no);
+
+    config_parse_ipset(val);
     state = CF_NEED_SIG;
 
   } else if (!strcmp((char*)line, "sig")) {
 
+    if (state == CF_NEED_IPSET) {
+      /* ipset is optional */
+      ipset_id = -1;
+      state = CF_NEED_SIG;
+    }
     if (state != CF_NEED_SIG) FATAL("Misplaced 'sig' in line %u.", line_no);
 
     switch (mod_type) {
 
       case CF_MOD_TCP:
         tcp_register_sig(mod_to_srv, generic, sig_class, sig_name, sig_flavor,
-                         label_id, cur_sys, cur_sys_cnt, val, line_no);
+                         label_id, ipset_id, cur_sys, cur_sys_cnt, val, line_no);
         break;
 
       case CF_MOD_MTU:

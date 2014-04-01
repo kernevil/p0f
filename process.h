@@ -99,6 +99,7 @@ struct host_data {
   struct tcp_sig* last_syn;             /* Sig of the most recent SYN         */
   struct tcp_sig* last_synack;          /* Sig of the most recent SYN+ACK     */
 
+  s32 last_ipset_id;                    /* Last ipset was added (-1 = none)   */
   s32 last_class_id;                    /* OS class ID (-1 = not found)       */
   s32 last_name_id;                     /* OS name ID (-1 = not found)        */
   u8* last_flavor;                      /* Last OS flavor                     */

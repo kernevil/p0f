@@ -803,6 +803,12 @@ static void destroy_host(struct host_data* h) {
   DEBUG("[#] Destroying host data: %s (bucket %d)\n",
         addr_to_str(h->addr, h->ip_ver), bucket);
 
+  /* TODO Remove host from ipset */
+  if (h->last_ipset_id != -1) {
+    DEBUG("[#] Destroying host %s, removing from IPSET %s\n",
+        addr_to_str(h->addr, h->ip_ver), fp_ipset_names[h->last_ipset_id]);
+  }
+
   /* Remove it from the bucketed linked list. */
 
   if (CP(h->next)) h->next->prev = h->prev;
@@ -896,6 +902,7 @@ static struct host_data* create_host(u8* addr, u8 ip_ver) {
   nh->last_seen = nh->first_seen = get_unix_time();
 
   nh->last_up_min     = -1;
+  nh->last_ipset_id   = -1;
   nh->last_class_id   = -1;
   nh->last_name_id    = -1;
   nh->http_name_id    = -1;

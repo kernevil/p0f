@@ -65,6 +65,7 @@ struct tcp_sig_record {
 
   u32 label_id;                         /* Signature label ID                 */
 
+  u32 ipset_id;                         /* Signature ipset                    */
   u32* sys;                             /* OS class / name IDs for user apps  */
   u32  sys_cnt;                         /* Length of sys                      */
 
@@ -82,7 +83,7 @@ struct packet_data;
 struct packet_flow;
 
 void tcp_register_sig(u8 to_srv, u8 generic, s32 sig_class, u32 sig_name,
-                      u8* sig_flavor, u32 label_id, u32* sys, u32 sys_cnt,
+                      u8* sig_flavor, u32 label_id, u32 ipset_id, u32* sys, u32 sys_cnt,
                       u8* val, u32 line_no);
 
 struct tcp_sig* fingerprint_tcp(u8 to_srv, struct packet_data* pk,

@@ -277,7 +277,7 @@ static void tcp_find_match(u8 to_srv, struct tcp_sig* ts, u8 dupe_det,
    function is too long. */
 
 void tcp_register_sig(u8 to_srv, u8 generic, s32 sig_class, u32 sig_name,
-                      u8* sig_flavor, u32 label_id, u32* sys, u32 sys_cnt,
+                      u8* sig_flavor, u32 label_id, u32 ipset_id, u32* sys, u32 sys_cnt,
                       u8* val, u32 line_no) {
 
   s8  ver, win_type, pay_class;
@@ -723,6 +723,7 @@ void tcp_register_sig(u8 to_srv, u8 generic, s32 sig_class, u32 sig_name,
   trec->line_no  = line_no;
   trec->sig      = tsig;
   trec->bad_ttl  = bad_ttl;
+  trec->ipset_id = ipset_id;
 
   /* All done, phew. */
 
@@ -1140,6 +1141,21 @@ log_and_update:
   /* Update some of the essential records. */
 
   if (sig->matched) {
+
+    /* TODO */
+    if (hd->last_ipset_id != -1 && hd->last_ipset_id != sig->matched->ipset_id) {
+      DEBUG("[#] Remove %s from IPSET %s\n", addr_to_str(f->client->addr, f->client->ip_ver), fp_ipset_names[hd->last_ipset_id]);
+      // if (success) {
+        hd->last_ipset_id = -1;
+      // }
+    }
+
+    if (hd->last_ipset_id == -1 && sig->matched->ipset_id != -1) {
+      DEBUG("[#] Add host %s to IPSET %s\n", addr_to_str(f->client->addr, f->client->ip_ver), fp_ipset_names[sig->matched->ipset_id]);
+      //if (success) {
+        hd->last_ipset_id = sig->matched->ipset_id;
+      //}
+    }
 
     hd->last_class_id = sig->matched->class_id;
     hd->last_name_id  = sig->matched->name_id;

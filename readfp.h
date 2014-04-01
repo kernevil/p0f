@@ -24,7 +24,8 @@
 #define CF_NEED_SECT         0x00       /* Waiting for [...] or 'classes'     */
 #define CF_NEED_LABEL        0x01       /* Waiting for 'label'                */
 #define CF_NEED_SYS          0x02       /* Waiting for 'sys'                  */
-#define CF_NEED_SIG          0x03       /* Waiting for signatures, if any.    */
+#define CF_NEED_IPSET        0x03       /* Waiting for 'ipset'                */
+#define CF_NEED_SIG          0x04       /* Waiting for signatures, if any.    */
 
 /* Flag to distinguish OS class and name IDs */
 
@@ -33,6 +34,7 @@
 
 extern u8** fp_os_classes;
 extern u8** fp_os_names;
+extern u8** fp_ipset_names;
 
 void read_config(u8* fname);
 

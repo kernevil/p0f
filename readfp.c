@@ -31,6 +31,7 @@
 #include "fp_http.h"
 #include "readfp.h"
 #include "ipset.h"
+#include "p0f.h"
 
 static u32 sig_cnt;                     /* Total number of p0f.fp sigs        */
 
@@ -129,9 +130,12 @@ u32 lookup_ipset_id(u8 *name, u8 len) {
 static void config_parse_ipset(u8* val) {
   u8* nxt;
   int ret;
+  uint64_t timeout;
 
   /* Create the set */
-  ret = ipset_create((char *)val, "hash:ip", 0);
+  //timeout = host_idle_limit * 60;
+  timeout = 0;
+  ret = ipset_create((char *)val, "hash:ip", timeout);
   if (ret == 0) {
     nxt = val;
     while (isalnum(*nxt)) nxt++;

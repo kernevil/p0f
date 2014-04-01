@@ -25,6 +25,7 @@
 #include "tcp.h"
 #include "readfp.h"
 #include "p0f.h"
+#include "ipset.h"
 
 #include "fp_tcp.h"
 
@@ -1142,19 +1143,35 @@ log_and_update:
 
   if (sig->matched) {
 
-    /* TODO */
     if (hd->last_ipset_id != -1 && hd->last_ipset_id != sig->matched->ipset_id) {
-      DEBUG("[#] Remove %s from IPSET %s\n", addr_to_str(f->client->addr, f->client->ip_ver), fp_ipset_names[hd->last_ipset_id]);
-      // if (success) {
+      const char *setname;
+      const char *addr;
+      int ret;
+
+      setname = (char *)fp_ipset_names[hd->last_ipset_id];
+      addr = (char *)addr_to_str(f->client->addr, f->client->ip_ver);
+      DEBUG("[#] Remove %s from IPSET %s\n", addr, setname);
+      ret = ipset_remove(setname, addr);
+      if (ret == 0) {
         hd->last_ipset_id = -1;
-      // }
+      }
     }
 
     if (hd->last_ipset_id == -1 && sig->matched->ipset_id != -1) {
-      DEBUG("[#] Add host %s to IPSET %s\n", addr_to_str(f->client->addr, f->client->ip_ver), fp_ipset_names[sig->matched->ipset_id]);
-      //if (success) {
+      const char *setname;
+      const char *addr;
+      uint64_t timeout;
+      int ret;
+
+      //timeout = host_idle_limit * 60;
+      timeout = 0;
+      setname = (char *)fp_ipset_names[sig->matched->ipset_id];
+      addr = (char *)addr_to_str(f->client->addr, f->client->ip_ver);
+      DEBUG("[#] Add host %s to IPSET %s\n", addr, setname);
+      ret = ipset_add(setname, addr, timeout);
+      if (ret == 0) {
         hd->last_ipset_id = sig->matched->ipset_id;
-      //}
+      }
     }
 
     hd->last_class_id = sig->matched->class_id;

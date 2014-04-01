@@ -32,6 +32,7 @@
 #include "tcp.h"
 #include "readfp.h"
 #include "p0f.h"
+#include "ipset.h"
 
 #include "fp_tcp.h"
 #include "fp_mtu.h"
@@ -803,10 +804,18 @@ static void destroy_host(struct host_data* h) {
   DEBUG("[#] Destroying host data: %s (bucket %d)\n",
         addr_to_str(h->addr, h->ip_ver), bucket);
 
-  /* TODO Remove host from ipset */
   if (h->last_ipset_id != -1) {
-    DEBUG("[#] Destroying host %s, removing from IPSET %s\n",
-        addr_to_str(h->addr, h->ip_ver), fp_ipset_names[h->last_ipset_id]);
+    const char *setname;
+    const char *addr;
+    int ret;
+
+    addr = (char *)addr_to_str(h->addr, h->ip_ver);
+    setname = (char *)fp_ipset_names[h->last_ipset_id];
+    DEBUG("[#] Destroying host %s, removing from IPSET %s\n", addr, setname);
+    ret = ipset_remove(setname, addr);
+    if (ret == 0) {
+      h->last_ipset_id = -1;
+    }
   }
 
   /* Remove it from the bucketed linked list. */

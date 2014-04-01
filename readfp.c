@@ -30,6 +30,7 @@
 #include "fp_mtu.h"
 #include "fp_http.h"
 #include "readfp.h"
+#include "ipset.h"
 
 static u32 sig_cnt;                     /* Total number of p0f.fp sigs        */
 
@@ -127,10 +128,17 @@ u32 lookup_ipset_id(u8 *name, u8 len) {
 
 static void config_parse_ipset(u8* val) {
   u8* nxt;
+  int ret;
 
-  nxt = val;
-  while (isalnum(*nxt)) nxt++;
-  ipset_id = lookup_ipset_id(val, nxt - val);
+  /* Create the set */
+  ret = ipset_create((char *)val, "hash:ip", 0);
+  if (ret == 0) {
+    nxt = val;
+    while (isalnum(*nxt)) nxt++;
+    ipset_id = lookup_ipset_id(val, nxt - val);
+  } else {
+    ipset_id = -1;
+  }
 }
 
 /* Parse 'label' parameter by looking up ID and recording name / flavor. */

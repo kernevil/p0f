@@ -39,7 +39,8 @@ struct api_client {
   struct p0f_api_query in_data;         /* Query recv buffer                  */
   u32 in_off;                           /* Query buffer offset                */
 
-  struct p0f_api_response out_data;     /* Response transmit buffer           */
+  void *out_data;     			/* Response transmit buffer           */
+  u32 out_data_len;                     /* Response buffer length             */
   u32 out_off;                          /* Response buffer offset             */
 
 };

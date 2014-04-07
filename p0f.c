@@ -837,8 +837,8 @@ poll_again:
             FATAL("Inconsistent p0f_api_response state.\n");
 
           i = write(pfds[cur].fd, 
-                   ((char*)&ctable[cur]->out_data) + ctable[cur]->out_off,
-                   sizeof(struct p0f_api_response) - ctable[cur]->out_off);
+                   ((char*)ctable[cur]->out_data) + ctable[cur]->out_off,
+                   ctable[cur]->out_data_len - ctable[cur]->out_off);
 
           if (i <= 0) PFATAL("write() on API socket fails despite POLLOUT.");
 
@@ -846,10 +846,11 @@ poll_again:
 
           /* All done? Back to square zero then! */
 
-          if (ctable[cur]->out_off == sizeof(struct p0f_api_response)) {
+          if (ctable[cur]->out_off == ctable[cur]->out_data_len) {
 
-             ctable[cur]->in_off = ctable[cur]->out_off = 0;
+             ctable[cur]->in_off = ctable[cur]->out_off = ctable[cur]->out_data_len = 0;
              pfds[cur].events   = (POLLIN | POLLERR | POLLHUP);
+             ck_free(ctable[cur]->out_data);
 
           }
 
@@ -921,7 +922,7 @@ poll_again:
 
           if (ctable[cur]->in_off == sizeof(struct p0f_api_query)) {
 
-            handle_query(&ctable[cur]->in_data, &ctable[cur]->out_data);
+            handle_query(&ctable[cur]->in_data, &ctable[cur]->out_data, &ctable[cur]->out_data_len);
             pfds[cur].events = (POLLOUT | POLLERR | POLLHUP);
 
           }

@@ -28,20 +28,23 @@
 #define P0F_MATCH_FUZZY      0x01
 #define P0F_MATCH_GENERIC    0x02
 
+#define P0F_CMD_QUERY_HOST   0x01
+#define P0F_CMD_QUERY_CACHE  0x02
+
 /* Keep these structures aligned to avoid architecture-specific padding. */
 
 struct p0f_api_query {
 
   u32 magic;                            /* Must be P0F_QUERY_MAGIC            */
+  u32 command;
   u8  addr_type;                        /* P0F_ADDR_*                         */
   u8  addr[16];                         /* IP address (big endian left align) */
 
 } __attribute__((packed));
 
-struct p0f_api_response {
-
-  u32 magic;                            /* Must be P0F_RESP_MAGIC             */
-  u32 status;                           /* P0F_STATUS_*                       */
+struct p0f_api_response_host {
+  u8  addr[16];                         /* IP address (big endian left align) */
+  u8  addr_type;                        /* P0F_ADDR_*                         */
 
   u32 first_seen;                       /* First seen (unix time)             */
   u32 last_seen;                        /* Last seen (unix time)              */
@@ -67,12 +70,16 @@ struct p0f_api_response {
   u8  link_type[P0F_STR_MAX + 1];       /* Link type                          */
 
   u8  language[P0F_STR_MAX + 1];        /* Language                           */
+} __attribute__((packed));
 
+struct p0f_api_response_header {
+  u32 magic;                            /* Must be P0F_RESP_MAGIC             */
+  u32 status;                           /* P0F_STATUS_*                       */
 } __attribute__((packed));
 
 #ifdef _FROM_P0F
 
-void handle_query(struct p0f_api_query* q, struct p0f_api_response* r);
+void handle_query(struct p0f_api_query* q, void **out_data, u32 *out_data_len);
 
 #endif /* _FROM_API */
 

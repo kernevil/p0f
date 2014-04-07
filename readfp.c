@@ -128,7 +128,6 @@ u32 lookup_ipset_id(u8 *name, u8 len) {
 }
 
 static void config_parse_ipset(u8* val) {
-  u8* nxt;
   int ret;
   uint64_t timeout;
 
@@ -137,11 +136,9 @@ static void config_parse_ipset(u8* val) {
   timeout = 0;
   ret = ipset_create((char *)val, "hash:ip", timeout);
   if (ret == 0) {
-    nxt = val;
-    while (isalnum(*nxt)) nxt++;
-    ipset_id = lookup_ipset_id(val, nxt - val);
+    ipset_id = lookup_ipset_id(val, strlen((char *)val));
   } else {
-    ipset_id = -1;
+    PFATAL("ipset_create() failed.");
   }
 }
 

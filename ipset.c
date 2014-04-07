@@ -11,11 +11,11 @@ static int ipset_session_close();
 ipset_handle_error(const struct ipset_session *session, const char *err, ...)
 {
   va_list argptr;
+  if (session == NULL) {
+    return;
+  }
   if (err == NULL) {
     err = (char *)ipset_session_error(session);
-    if (err == NULL) {
-      err = "Unknown error";
-    }
   }
   va_start(argptr, err);
   fprintf(stderr, err, argptr);
@@ -176,40 +176,40 @@ ipset_create(const char *setname, const char *settype, uint64_t timeout)
     }
   }
 
-  ret = ipset_list(setname);
-  if (ret == 0) {
-    /* Delete and recreate */
-    ret = ipset_destroy(setname);
-    if (ret < 0) {
-      ipset_handle_error(session, NULL);
-      return -1;
-    }
-  }
-
   ret = ipset_parse_setname(session, IPSET_SETNAME, setname);
   if (ret < 0) {
     ipset_handle_error(session, NULL);
     return -1;
   }
 
-  ret = ipset_parse_typename(session, IPSET_OPT_TYPENAME, settype);
+  ret = ipset_cmd(session, IPSET_CMD_FLUSH, 0);
   if (ret < 0) {
-    ipset_handle_error(session, NULL);
-    return -1;
-  }
-
-  if (timeout != 0) {
-    ret = ipset_session_data_set(session, IPSET_OPT_TIMEOUT, &timeout);
+    // Does not exists
+    ret = ipset_parse_setname(session, IPSET_SETNAME, setname);
     if (ret < 0) {
       ipset_handle_error(session, NULL);
       return -1;
     }
-  }
 
-  ret = ipset_cmd(session, IPSET_CMD_CREATE, 0);
-  if (ret < 0) {
-    ipset_handle_error(session, NULL);
-    return -1;
+    ret = ipset_parse_typename(session, IPSET_OPT_TYPENAME, settype);
+    if (ret < 0) {
+      ipset_handle_error(session, NULL);
+      return -1;
+    }
+
+    if (timeout != 0) {
+      ret = ipset_session_data_set(session, IPSET_OPT_TIMEOUT, &timeout);
+      if (ret < 0) {
+        ipset_handle_error(session, NULL);
+        return -1;
+      }
+    }
+
+    ret = ipset_cmd(session, IPSET_CMD_CREATE, 0);
+    if (ret < 0) {
+      ipset_handle_error(session, NULL);
+      return -1;
+    }
   }
 
   ipset_session_close();

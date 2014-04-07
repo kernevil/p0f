@@ -62,6 +62,13 @@ static void flow_dispatch(struct packet_data* pk);
 static void nuke_flows(u8 silent);
 static void expire_cache(void);
 
+u32 get_host_count(void) {
+  return host_cnt;
+}
+
+struct host_data* get_newest_host(void) {
+  return newest_host;
+}
 
 /* Get unix time in milliseconds. */
 

@@ -214,4 +214,7 @@ struct host_data* lookup_host(u8* addr, u8 ip_ver);
 
 void destroy_all_hosts(void);
 
+u32 get_host_count(void);
+struct host_data* get_newest_host(void);
+
 #endif /* !_HAVE_PROCESS_H */

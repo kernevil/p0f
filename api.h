@@ -29,16 +29,17 @@
 #define P0F_MATCH_GENERIC    0x02
 
 #define P0F_CMD_QUERY_HOST   0x01
-#define P0F_CMD_QUERY_CACHE  0x02
+#define P0F_CMD_QUERY_NET    0x02
 
 /* Keep these structures aligned to avoid architecture-specific padding. */
 
 struct p0f_api_query {
 
-  u32 magic;                            /* Must be P0F_QUERY_MAGIC            */
-  u32 command;
-  u8  addr_type;                        /* P0F_ADDR_*                         */
-  u8  addr[16];                         /* IP address (big endian left align) */
+    u32 magic;                         /* Must be P0F_QUERY_MAGIC            */
+    u32 command;
+    u8  addr_type;                     /* P0F_ADDR_*                         */
+    u8  addr[16];                      /* IP address (big endian left align) */
+    u8  prefix;	                       /* Prefix length of net command       */
 
 } __attribute__((packed));
 

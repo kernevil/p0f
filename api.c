@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "tcp.h"
 #include "types.h"
 #include "config.h"
 #include "debug.h"
@@ -24,6 +25,23 @@
 #include "readfp.h"
 
 /* Process API queries. */
+
+inline uint32_t ip_to_uint(const u8 *ip) {
+  return (ip[0] << 24 | ip[1] << 16 | ip[2] << 8  | ip[3]);
+}
+
+int ip_in_network(const u8 *ip, const u8 *net, u8 prefix) {
+  uint32_t mask      = (0xffffffff >> (32 - prefix)) << (32 - prefix);
+  uint32_t ip_addr   = ip_to_uint(ip);
+  uint32_t net_addr  = ip_to_uint(net);
+  uint32_t net_lower = (net_addr & mask);
+  uint32_t net_upper = (net_lower | (~mask));
+
+  if (ip_addr >= net_lower && ip_addr <= net_upper) {
+    return 1;
+  }
+  return 0;
+}
 
 void fill_host(struct p0f_api_response_host *r, struct host_data *h)
 {
@@ -109,10 +127,13 @@ void handle_query_host(struct p0f_api_query* q, void **out_data, u32 *out_data_l
   fill_host(body, h);
 }
 
-void handle_query_cache(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {
+void handle_query_net(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {
+
   struct p0f_api_response_header *header;
   struct host_data *h = get_newest_host();
+  struct host_data **filtered_hosts = NULL;
   u32 count = get_host_count();
+  u32 filtered_count = 0;
   u32 *aux;
 
   *out_data = ck_alloc(sizeof(struct p0f_api_response_header));
@@ -121,33 +142,42 @@ void handle_query_cache(struct p0f_api_query* q, void **out_data, u32 *out_data_
   header->magic = P0F_RESP_MAGIC;
   header->status = P0F_STATUS_OK;
 
+  if (q->addr_type != P0F_ADDR_IPV4) {
+    header->status = P0F_STATUS_NOMATCH;
+    return;
+  }
+
+  filtered_hosts = ck_alloc(sizeof(struct host_data *) * count);
+  while (h) {
+    if (h->ip_ver == IP_VER4 && ip_in_network(h->addr, q->addr, q->prefix)) {
+      filtered_hosts[filtered_count++] = h;
+    }
+    h = h->older;
+  }
+
   *out_data = ck_realloc(*out_data, *out_data_len + sizeof(u32));
   aux = *out_data + *out_data_len;
   *out_data_len += sizeof(u32);
-  *aux = count;
+  *aux = filtered_count;
 
-  while (h) {
+  for (count = 0; count < filtered_count; count++) {
     struct p0f_api_response_host *aux2;
-
     *out_data = ck_realloc(*out_data, *out_data_len + sizeof(struct p0f_api_response_host));
     aux2 = *out_data + *out_data_len;
     *out_data_len += sizeof(struct p0f_api_response_host);
-
-    fill_host(aux2, h);
-    h = h->older;
+    fill_host(aux2, filtered_hosts[count]);
   }
 }
 
 void handle_query(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {
+
   if (out_data == NULL) {
     WARN("%s: NULL output buffer!", __func__);
     return;
   }
 
-
   if (q->magic != P0F_QUERY_MAGIC) {
     struct p0f_api_response_header *r = ck_alloc(sizeof(struct p0f_api_response_header));;
-
     WARN("Query with bad magic (0x%x).", q->magic);
     r->magic = P0F_RESP_MAGIC;
     r->status = P0F_STATUS_BADQUERY;
@@ -158,13 +188,14 @@ void handle_query(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {
 
   switch (q->command) {
     case P0F_CMD_QUERY_HOST:
-	handle_query_host(q, out_data, out_data_len);
-        break;
-    case P0F_CMD_QUERY_CACHE:
-        handle_query_cache(q, out_data, out_data_len);
-        break;
+      handle_query_host(q, out_data, out_data_len);
+      break;
+    case P0F_CMD_QUERY_NET:
+      handle_query_net(q, out_data, out_data_len);
+      break;
     default:
       WARN("Unknown API command 0x%x\n", q->command);
       return;
   }
+
 }

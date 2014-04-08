@@ -1,0 +1,12 @@
+#!/bin/sh
+# Copyright 2014 Zentyal S.L.
+
+set -e
+
+if [ "$1" = "purge" ] ; then
+    rm -rf /var/run/p0f || true
+    deluser --system p0f || true
+    delgroup --system p0f || true
+fi
+
+exit 0

@@ -1,0 +1,18 @@
+#!/bin/sh
+# Copyright 2014 Zentyal S.L.
+
+set -e
+
+P0FUSER=p0f
+P0FHOME=/var/run/p0f
+
+if [ "$1" = configure ]; then
+    adduser --system \
+            --quiet \
+            --home "$P0FHOME" \
+            --no-create-home \
+            --disabled-password \
+            --group "$P0FUSER"
+fi
+
+exit 0

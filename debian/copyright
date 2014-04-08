@@ -1,0 +1,27 @@
+This is Debian GNU's prepackaged version of p0f, a passive OS
+fingerprinting tool.
+
+This package was put together by me, James Troup <james@nocrew.org>,
+from the sources, which I obtained from:
+  http://lcamtuf.coredump.cx/p0f.shtml
+
+Program Copyright (C) Copyright 2000-2006 by Michal Zalewski <lcamtuf@coredump.cx>
+Modifications for Debian Copyright (C) 2002-2007 James Troup.
+Modifications for ipset management Copyright (C) 2014 Zentyal S.L.
+
+p0f is free software; you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the
+Free Software Foundation; either version 2 of the License, or (at your
+option) any later version.
+
+p0f is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License with your Debian GNU system, in
+/usr/share/common-licenses/LGPL-2.1, or with the Debian GNU p0f source
+package as the file COPYING; if not, write to the Free Software
+Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301,
+USA

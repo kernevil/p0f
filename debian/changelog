@@ -1,0 +1,141 @@
+p0f (3.0.6b-1zentyal1) saucy; urgency=low
+
+  * New upstream release
+  * Added ipset management
+
+ -- Samuel Cabrero <scabrero@zentyal.com>  Thu, 03 Apr 2014 12:23:34 +0200
+
+p0f (2.0.8-2) unstable; urgency=low
+
+  * New maintainer, thanks to James Troup for his work.
+  * Bump standards version to 3.8.0
+  * Fix lintian warnings:
+    - debian-rules-ignores-make-clean-error
+    - old-fsf-address-in-copyright-file
+
+ -- Pierre Chifflier <pollux@debian.org>  Wed, 27 Aug 2008 13:20:43 +0200
+
+p0f (2.0.8-1) unstable; urgency=low
+
+  * New upstream release.  Closes: #382622, #388203
+   * Fixes buffer overflow in argument parsing.  Closes: #392455
+
+  * p0f.1: patch from Stephen Gran <sgran@debian.org> to fix unescaped
+    '-'s and misplaced .fp. Closes: #341967
+
+  * debian/control (Build-Depends): switch to libpcap0.8-dev.
+
+  * debian/control (Standards-Version): bump to 3.7.2.2.
+
+ -- James Troup <james@nocrew.org>  Sun,  5 Aug 2007 17:37:42 +0100
+
+p0f (2.0.5-1) unstable; urgency=low
+
+  * New upstream release.  Closes: #271643
+  * debian/rules (binary-arch): install upstream manpage.  Closes: #248346
+  * p0f-query.c: apply patch from Colin Phipps to fix a typo in sizeof
+    usage which was causing the query interface to leak OS details from
+    old cache entries into new entries.  Closes: #276373
+
+ -- James Troup <james@nocrew.org>  Sat, 27 Nov 2004 23:38:35 +0000
+
+p0f (2.0.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+  * debian/rules: Patch from Ingo Saitz <ingo@debian.org> to install
+    fingerprints correctly (i.e. all of the, into /etc/p0f/).
+  * debian/conffiles: likewise. Closes: #214137, #240227 
+
+ -- James Troup <james@nocrew.org>  Mon, 10 May 2004 20:10:07 +0100
+
+p0f (2.0.2-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- James Troup <james@nocrew.org>  Fri, 26 Sep 2003 15:51:13 +0100
+
+p0f (2.0.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+  * debian/rules: update copyright and version.
+  * debian/copyright: likewise.
+
+  * 01_optional-promiscuous.dpatch: dropped; merged upstream (albeit with
+    the meaning of -p reversed).
+  * 02_manpage-section.dpatch: dropped; manpage has been dropped
+    upstream(!).
+
+  * debian/control (Build-Depends): drop dpatch - unused.
+  * debian/rules: don't include /usr/share/dpatch/dpatch.make.
+  * debian/rules (build): don't depend on patch-stamp.
+  * debian/rules (clean): don't depend on unpatch and don't remove debian/patched.
+
+  * debian/control (Build-Depends): drop libmysqlclient10-dev - new
+    upstream release no longer supports logging to a mysql database.
+  * debian/rules (build): don't try to build p0f-mysql; just build the
+    default target.
+  * debian/rules (binary-arch): mysql/p0f-mysql.conf and mysql/db.sql. are
+    gone.
+  * debian/conffiles: drop /etc/p0f-mysql.conf.
+
+  * debian/rules (binary-arch): p0f.init's gone.
+  * debian/rules (binary-arch): install additional documents
+    doc/KNOWN_BUGS and doc/TODO.  ChangeLog's gone.  CREDITS moved to
+    doc/.
+  * debian/rules (binary-arch): p0f.1 is gone.
+  * debian/rules (binary-arch): install p0frep executable.
+
+  * debian/control (Standards-Version): bump to 3.6.1.0.
+
+ -- James Troup <james@nocrew.org>  Wed,  3 Sep 2003 22:10:39 +0100
+
+p0f (1.8.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules (build): make p0f-mysql rather than p0f.
+  * debian/rules (binary-arch): install mysql/db.sql into <doc>/examples/
+    and mysql/p0f-mysql.conf into /etc/.
+  * debian/conffiles: add /etc/p0f-mysql.conf.
+  * debian/control (Build-Depends): add libmysqlclient10-dev.
+
+  * Move to dpatch; existing non-debian/ changes split into
+    01_optional-promiscuous and 02_manpage-section.
+  * debian/rules: include /usr/share/dpatch/dpatch.make.
+  * debian/rules (build): depend on patch-stamp.
+  * debian/rules (clean): depend on unpatch.  Remove debian/patched.
+  * debian/control (Build-Depends): add dpatch.
+
+  * debian/rules: update copyright and version.
+  * debian/copyright: likewise.
+
+  * debian/control (Standards-Version): bump to 3.5.9.0.
+  * debian/postinst, debian/prerm: remove; no longer do /usr/doc symlinks.
+  * debian/rules (binary-arch): don't install obsolete postinst or prerm.
+
+  * debian/rules (clean): remove *~ in any subdirectory.
+
+  * debian/control (Description): capitalize first letter.  Closes: #156537
+
+  * 01_optional-promiscuous.dpatch: updated to add 'p' to the optstring
+    argument to getopt so it's recognised.  Thanks to Marco Bodrato
+    <bodrato@gulp.linux.it>.  Closes: #157286
+
+ -- James Troup <james@nocrew.org>  Sat,  5 Apr 2003 22:24:05 +0100
+
+p0f (1.8.2-1.1) unstable; urgency=low
+
+  * Non maintainer upload
+  * Rebuilt with new libpcap to remove dependency on libpcap0, which I
+    got removed from unstable by accident. Sorry about this...
+
+ -- Torsten Landschoff <torsten@debian.org>  Sat, 10 Aug 2002 11:37:26 +0200
+
+p0f (1.8.2-1) unstable; urgency=low
+
+  * Initial release, Closes: #132886.
+  * Patch from Tommi Komulainen <Tommi.Komulainen@iki.fi> to implement -p
+    which makes p0f not force the interface into promiscuous mode.
+
+ -- James Troup <james@nocrew.org>  Sun, 17 Feb 2002 02:50:55 +0000

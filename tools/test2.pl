@@ -8,7 +8,7 @@ use IO::Socket;
 
 use Data::Dumper;
 
-use constant DEBUG => 1;
+use constant DEBUG => 0;
 
 use constant P0F_QUERY_MAGIC      => 0x50304601;
 use constant P0F_RESP_MAGIC       => 0x50304602;
@@ -22,15 +22,16 @@ use constant P0F_MATCH_GENERIC    => 0x02;
 use constant P0F_CMD_QUERY_HOST   => 0x01;
 use constant P0F_CMD_QUERY_CACHE  => 0x02;
 
-
 my $client = new IO::Socket::UNIX(
-	Peer       => "/var/run/p0f/p0f.sock",
-        Type      => SOCK_STREAM,
-        Timeout   => 10) or die $@;
+    Peer    => "/var/run/p0f/p0f.sock",
+    Type    => SOCK_STREAM,
+    Timeout => 10) or die $@;
 
-my @ip = ();
-my $query = pack('L L C A16', P0F_QUERY_MAGIC, P0F_CMD_QUERY_CACHE, P0F_ADDR_IPV4, @ip);
-syswrite($client, $query, 25);
+my @ip = qw( 192 168 55 0);
+my $query = pack('L L C C16', P0F_QUERY_MAGIC, P0F_CMD_QUERY_CACHE, P0F_ADDR_IPV4, @ip);
+$query .= pack ('C', 24);
+print Dumper unpack ('H*', $query);
+syswrite($client, $query, 26);
 
 my $header;
 sysread($client, $header, 8);
@@ -50,7 +51,7 @@ my $count;
 sysread($client, $count, 4);
 
 $count = unpack('L', $count);
-print "Count: $count\n" if DEBUG;
+print "Count: $count\n";
 
 exit 0 unless ($count > 0);
 
@@ -65,21 +66,21 @@ my $offset = 0;
 for (my $i = 0; $i < $count; $i++) {
 	my ($addr,
 	    $addrType,
-	    $firstSeen, 
-	    $lastSeen, 
-	    $totalConn, 
-	    $uptimeMinutes, 
-	    $uptimeDays, 
-	    $lastNAT, 
-	    $lastOSChange, 
-	    $distance, 
+	    $firstSeen,
+	    $lastSeen,
+	    $totalConn,
+	    $uptimeMinutes,
+	    $uptimeDays,
+	    $lastNAT,
+	    $lastOSChange,
+	    $distance,
 	    $badSW,
 	    $matchQuality,
-	    $osName, 
-	    $osFlavour, 
-	    $httpName, 
-	    $httpFlavour, 
-	    $linkType, 
+	    $osName,
+	    $osFlavour,
+	    $httpName,
+	    $httpFlavour,
+	    $linkType,
 	    $language) = unpack("@" ."$offset" . "(A16 C L L L L L L L s C C A32 A32 A32 A32 A32 A32)", $payload);
 	$offset += $chunkSize;
 
@@ -98,4 +99,5 @@ for (my $i = 0; $i < $count; $i++) {
 	print "HTTP Flavour:    '$httpFlavour'\n";
 	print "Link type:       '$linkType'\n";
 	print "Language:        '$language'\n";
+	print "\n";
 }

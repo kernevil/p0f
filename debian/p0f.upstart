@@ -1,0 +1,34 @@
+# p0f - Passive OS fingerprinter
+
+description "p0f"
+author "Michal Zalewski <lcamtuf@coredump.cx>"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+
+pre-start script
+    if [ ! -d /var/run/p0f ]; then
+        mkdir -p /var/run/p0f
+    fi
+end script
+
+script
+    if [ -r /etc/default/p0f ]; then
+    . /etc/default/p0f
+    fi
+
+    INTERFACE=${INTERFACE:=any}
+    CONFFILE=${CONFFILE:='/etc/p0f/p0f.fp'}
+    SOCKET=${SOCKET:=/var/run/p0f/p0f.sock}
+    USER=${USER:=p0f}
+    CONN_CACHE_AGE=${CONN_CACHE_AGE:=30}
+    HOST_CACHE_AGE=${HOST_CACHE_AGE:=120}
+    CAPTURE_FILTER=${CAPTURE_FILTER:=''}
+
+    OPTIONS="-i $INTERFACE -f $CONFFILE -s $SOCKET -t $CONN_CACHE_AGE,$HOST_CACHE_AGE"
+
+    exec /usr/sbin/p0f $OPTIONS "$CAPTURE_FILTER"
+end script
+

@@ -26,6 +26,8 @@ struct packet_data {
 
   u8  src[16];                          /* Source address (left-aligned)      */
   u8  dst[16];                          /* Destination address (left-aligned  */
+  u8  src_mac[6];                       /* Source MAC address                 */
+  u8  dst_mac[6];                       /* Destination MAC address            */
 
   u16 sport;                            /* Source port                        */
   u16 dport;                            /* Destination port                   */
@@ -95,6 +97,7 @@ struct host_data {
 
   u8 ip_ver;                            /* Address type                       */
   u8 addr[16];                          /* Host address data                  */
+  u8 mac[6];                            /* Host MAC address                   */
 
   struct tcp_sig* last_syn;             /* Sig of the most recent SYN         */
   struct tcp_sig* last_synack;          /* Sig of the most recent SYN+ACK     */
@@ -172,7 +175,7 @@ struct packet_flow {
   u8  acked;                            /* SYN+ACK received?                  */
   u8  sendsyn;                          /* Created by p0f-sendsyn?            */
 
-  s16 srv_tps;                          /* Computed TS divisor (-1 = bad)     */ 
+  s16 srv_tps;                          /* Computed TS divisor (-1 = bad)     */
   s16 cli_tps;
 
   u8* request;                          /* Client-originating data            */

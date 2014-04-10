@@ -34,6 +34,22 @@
 
 #define PROTO_TCP         0x06
 
+/************
+ * Ethernet *
+ ************/
+struct ether_hdr {
+    u8 dst_mac[6];
+    u8 src_mac[6];
+    u8 type[2];
+} __attribute__((packed));
+
+struct linux_sll_hdr {
+    u16  packet_type;
+    u16  arphdr_type;
+    u16  link_layer_addr_length;
+    u8   link_layer_addr[8];
+    u16  protocol_type;
+} __attribute__((packed));
 
 /********
  * IPv4 *

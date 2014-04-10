@@ -50,7 +50,9 @@ void fill_host(struct p0f_api_response_host *r, struct host_data *h)
     return;
   }
 
-  strncpy((char *)r->addr, (char *)h->addr, 16);
+  memcpy((char *)r->addr, (char *)h->addr, 16);
+  memcpy((char *)r->mac, (char *)h->mac, 6);
+
   r->addr_type = h->ip_ver;
   r->first_seen = h->first_seen;
   r->last_seen  = h->last_seen;
@@ -167,6 +169,7 @@ void handle_query_net(struct p0f_api_query* q, void **out_data, u32 *out_data_le
     *out_data_len += sizeof(struct p0f_api_response_host);
     fill_host(aux2, filtered_hosts[count]);
   }
+  ck_free(filtered_hosts);
 }
 
 void handle_query(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {

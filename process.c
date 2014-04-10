@@ -241,6 +241,28 @@ void parse_packet(void* junk, const struct pcap_pkthdr* hdr, const u8* data) {
   //    hdr->len, hdr->caplen, SNAPLEN);
 
   /* Account for link-level headers. */
+  switch (link_type) {
+    case DLT_EN10MB:
+      {
+        struct ether_hdr *e;
+        e = (struct ether_hdr *)data;
+        memcpy(pk.src_mac, e->src_mac, 6);
+        memcpy(pk.dst_mac, e->dst_mac, 6);
+	break;
+      }
+#ifdef DLT_LINUX_SLL
+    case DLT_LINUX_SLL:
+      {
+       struct linux_sll_hdr *h;
+       h = (struct linux_sll_hdr *)data;
+       if (ntohs(h->arphdr_type) == DLT_EN10MB) {
+         memcpy(pk.src_mac, h->link_layer_addr, 6);
+         memset(pk.dst_mac, 0, 6);
+       }
+       break;
+     }
+#endif
+  }
 
   if (link_off < 0) find_offset(data, packet_len);
 
@@ -878,7 +900,7 @@ static void nuke_hosts(void) {
 
 /* Create a minimal host data. */
 
-static struct host_data* create_host(u8* addr, u8 ip_ver) {
+static struct host_data* create_host(u8* addr, u8 ip_ver, u8* mac) {
 
   u32 bucket = get_host_bucket(addr, ip_ver);
   struct host_data* nh;
@@ -914,6 +936,7 @@ static struct host_data* create_host(u8* addr, u8 ip_ver) {
 
   nh->ip_ver = ip_ver;
   memcpy(nh->addr, addr, (ip_ver == IP_VER4) ? 4 : 16);
+  memcpy(nh->mac, mac, 6);
 
   nh->last_seen = nh->first_seen = get_unix_time();
 
@@ -1054,12 +1077,12 @@ static struct packet_flow* create_flow_from_syn(struct packet_data* pk) {
   nf->client = lookup_host(pk->src, pk->ip_ver);
 
   if (nf->client) touch_host(nf->client);
-  else nf->client = create_host(pk->src, pk->ip_ver);
+  else nf->client = create_host(pk->src, pk->ip_ver, pk->src_mac);
 
   nf->server = lookup_host(pk->dst, pk->ip_ver);
 
   if (nf->server) touch_host(nf->server);
-  else nf->server = create_host(pk->dst, pk->ip_ver);
+  else nf->server = create_host(pk->dst, pk->ip_ver, pk->dst_mac);
 
   nf->client->use_cnt++;
   nf->server->use_cnt++;

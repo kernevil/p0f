@@ -46,6 +46,7 @@ struct p0f_api_query {
 struct p0f_api_response_host {
   u8  addr[16];                         /* IP address (big endian left align) */
   u8  addr_type;                        /* P0F_ADDR_*                         */
+  u8  mac[6];
 
   u32 first_seen;                       /* First seen (unix time)             */
   u32 last_seen;                        /* Last seen (unix time)              */

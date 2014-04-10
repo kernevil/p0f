@@ -15,4 +15,6 @@ if [ "$1" = configure ]; then
             --group "$P0FUSER"
 fi
 
+#DEBHELPER#
+
 exit 0

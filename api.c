@@ -167,6 +167,7 @@ void handle_query_net(struct p0f_api_query* q, void **out_data, u32 *out_data_le
     *out_data_len += sizeof(struct p0f_api_response_host);
     fill_host(aux2, filtered_hosts[count]);
   }
+  ck_free(filtered_hosts);
 }
 
 void handle_query(struct p0f_api_query* q, void **out_data, u32 *out_data_len) {

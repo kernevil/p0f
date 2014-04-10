@@ -50,7 +50,9 @@ void fill_host(struct p0f_api_response_host *r, struct host_data *h)
     return;
   }
 
-  strncpy((char *)r->addr, (char *)h->addr, 16);
+  memcpy((char *)r->addr, (char *)h->addr, 16);
+  memcpy((char *)r->mac, (char *)h->mac, 6);
+
   r->addr_type = h->ip_ver;
   r->first_seen = h->first_seen;
   r->last_seen  = h->last_seen;
